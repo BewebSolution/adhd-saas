@@ -1,0 +1,70 @@
+# Environment & Config
+.env
+.env.local
+*.env.backup
+
+# Dependency directories
+vendor/
+node_modules/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# Logs & Cache
+*.log
+logs/
+cache/
+temp/
+*.cache
+
+# Build & Compiled
+dist/
+build/
+*.min.js
+*.min.css
+
+# Database backups
+*.sql
+*.sqlite
+backups/
+
+# Uploads & User Content
+uploads/
+storage/
+
+# Test files
+test_*.php
+test_*.html
+phpunit.xml
+.phpunit.result.cache
+
+# Backup files
+*.backup
+*.backup_*
+*.bak
+*_backup.*
+php_errorlog
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Composer
+composer.phar
+composer.lock
+
+# Deployment scripts (keep deploy.sh in source control but not runtime files)
+.rsync-exclude
+
+# Documentation temp files (keep in source control)
+# istruzioni_sonnet/ - KEEP THIS

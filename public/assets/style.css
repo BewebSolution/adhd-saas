@@ -1,0 +1,277 @@
+/**
+ * Beweb Tirocinio - Custom Styles
+ * ADHD-friendly design: font più grandi, focus ring evidente, spazi generosi
+ */
+
+/* Base font size - più grande per leggibilità */
+:root {
+    font-size: 17px;
+}
+
+/* Focus ring evidente per navigazione keyboard */
+*:focus,
+*:focus-visible {
+    outline: 3px solid rgba(13, 110, 253, 0.4) !important;
+    outline-offset: 2px !important;
+}
+
+/* Card con padding maggiorato */
+.card-xl {
+    padding: 1.25rem;
+}
+
+.card {
+    border-radius: 0.5rem;
+}
+
+/* Header tabelle sticky */
+.table thead.sticky-top {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #f8f9fa;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Zebra striping più evidente */
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+
+/* Navbar più grande */
+.navbar-brand {
+    font-size: 1.4rem;
+}
+
+.nav-link {
+    font-size: 1rem;
+    padding: 0.6rem 1rem !important;
+}
+
+/* Pulsanti più grandi e spaziosi */
+.btn {
+    padding: 0.6rem 1.2rem;
+    font-weight: 500;
+}
+
+.btn-lg {
+    padding: 0.8rem 1.5rem;
+    font-size: 1.1rem;
+}
+
+/* Form controls più grandi */
+.form-control,
+.form-select {
+    padding: 0.6rem 0.9rem;
+    font-size: 1rem;
+}
+
+.form-control-lg {
+    padding: 0.8rem 1.2rem;
+    font-size: 1.1rem;
+}
+
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+}
+
+/* Badge più leggibili */
+.badge {
+    padding: 0.4em 0.8em;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+/* Card headers più evidenti */
+.card-header {
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+}
+
+/* Spacing generoso */
+.mb-4 {
+    margin-bottom: 2rem !important;
+}
+
+/* Link più evidenti */
+a {
+    text-decoration: none;
+    font-weight: 500;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Toast più grandi */
+.toast {
+    min-width: 300px;
+    font-size: 1rem;
+}
+
+.toast-body {
+    padding: 1rem;
+}
+
+/* Progress bar più alta */
+.progress {
+    height: 1.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* Alerts più spaziosi */
+.alert {
+    padding: 1rem 1.25rem;
+}
+
+.alert ul {
+    margin-bottom: 0.5rem;
+}
+
+/* Responsive tables */
+.table-responsive {
+    border-radius: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    :root {
+        font-size: 16px;
+    }
+
+    .btn-group-sm > .btn {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+    }
+
+    .table {
+        font-size: 0.9rem;
+    }
+
+    .card-body {
+        padding: 1rem;
+    }
+}
+
+/* Accessibility */
+.visually-hidden-focusable:not(:focus):not(:focus-within) {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+}
+
+/* Loading indicator */
+.spinner-border-sm {
+    width: 1.2rem;
+    height: 1.2rem;
+    border-width: 0.15em;
+}
+
+/* Modal più spaziosi */
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-header {
+    padding: 1.25rem 1.5rem;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+}
+
+/* Accordion */
+.accordion-button {
+    font-weight: 600;
+    padding: 1rem 1.25rem;
+}
+
+.accordion-body {
+    padding: 1.25rem;
+}
+
+/* Nav tabs più grandi */
+.nav-tabs .nav-link {
+    padding: 0.7rem 1.2rem;
+    font-weight: 500;
+}
+
+/* Input group */
+.input-group-text {
+    padding: 0.6rem 0.9rem;
+}
+
+/* Small text leggibile */
+small, .small {
+    font-size: 0.9em;
+}
+
+/* Footer */
+footer {
+    margin-top: auto;
+}
+
+/* Utility: testo troncato */
+.text-truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Print styles */
+@media print {
+    .navbar,
+    .btn,
+    footer,
+    .toast-container {
+        display: none !important;
+    }
+
+    .card {
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+    }
+
+    .table {
+        font-size: 0.85rem;
+    }
+}
+
+/* Dark mode (opzionale - da attivare con data-bs-theme="dark") */
+[data-bs-theme="dark"] {
+    color-scheme: dark;
+}
+
+[data-bs-theme="dark"] .card {
+    background-color: #212529;
+    border-color: #495057;
+}
+
+[data-bs-theme="dark"] .table {
+    --bs-table-bg: #212529;
+    --bs-table-striped-bg: #2c3034;
+}
+
+[data-bs-theme="dark"] .form-control,
+[data-bs-theme="dark"] .form-select {
+    background-color: #212529;
+    border-color: #495057;
+    color: #dee2e6;
+}
+
+[data-bs-theme="dark"] .form-control:focus,
+[data-bs-theme="dark"] .form-select:focus {
+    background-color: #212529;
+    border-color: #86b7fe;
+    color: #dee2e6;
+}
