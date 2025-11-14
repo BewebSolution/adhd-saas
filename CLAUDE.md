@@ -10,20 +10,21 @@
 ## 📋 Table of Contents
 
 1. [Project Overview](#project-overview)
-2. [Architecture & Technology Stack](#architecture--technology-stack)
-3. [Directory Structure](#directory-structure)
-4. [Critical Rules - DO NOT MODIFY](#critical-rules---do-not-modify)
-5. [Development Workflow](#development-workflow)
-6. [Code Conventions & Patterns](#code-conventions--patterns)
-7. [Database Schema](#database-schema)
-8. [Authentication & Security](#authentication--security)
-9. [AI Features & Services](#ai-features--services)
-10. [Routing System](#routing-system)
-11. [View System & Templates](#view-system--templates)
-12. [Testing & Debugging](#testing--debugging)
-13. [Deployment](#deployment)
-14. [Common Tasks](#common-tasks)
-15. [Troubleshooting](#troubleshooting)
+2. [Repository & SSH Access](#repository--ssh-access)
+3. [Architecture & Technology Stack](#architecture--technology-stack)
+4. [Directory Structure](#directory-structure)
+5. [Critical Rules - DO NOT MODIFY](#critical-rules---do-not-modify)
+6. [Development Workflow](#development-workflow)
+7. [Code Conventions & Patterns](#code-conventions--patterns)
+8. [Database Schema](#database-schema)
+9. [Authentication & Security](#authentication--security)
+10. [AI Features & Services](#ai-features--services)
+11. [Routing System](#routing-system)
+12. [View System & Templates](#view-system--templates)
+13. [Testing & Debugging](#testing--debugging)
+14. [Deployment](#deployment)
+15. [Common Tasks](#common-tasks)
+16. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -49,6 +50,339 @@
 ### Business Model
 
 Internal Beweb tool with potential for SaaS expansion
+
+---
+
+## 🔐 Repository & SSH Access
+
+### GitHub Repository
+
+**Repository URL:** https://github.com/BewebSolution/adhd-saas
+
+#### Clone con HTTPS (raccomandato per principianti)
+
+```bash
+git clone https://github.com/BewebSolution/adhd-saas.git
+cd adhd-saas
+```
+
+**Vantaggi:**
+- ✅ Non richiede configurazione SSH
+- ✅ Funziona immediatamente
+- ⚠️ Richiede username/password (o token) ad ogni push
+
+#### Clone con SSH (raccomandato per uso frequente)
+
+```bash
+git clone git@github.com:BewebSolution/adhd-saas.git
+cd adhd-saas
+```
+
+**Vantaggi:**
+- ✅ Nessuna password richiesta dopo configurazione
+- ✅ Più sicuro
+- ✅ Più veloce per operazioni frequenti
+
+### Configurare Chiavi SSH per GitHub
+
+Se non hai ancora configurato le chiavi SSH:
+
+#### 1. Genera chiave SSH (se non esiste)
+
+```bash
+# Verifica se esiste già una chiave
+ls -la ~/.ssh
+
+# Se non esiste, generane una nuova
+ssh-keygen -t ed25519 -C "tua_email@example.com"
+
+# Premi Enter per accettare il path predefinito (~/.ssh/id_ed25519)
+# Inserisci una passphrase (opzionale ma raccomandato)
+```
+
+#### 2. Copia la chiave pubblica
+
+```bash
+# Linux/Mac
+cat ~/.ssh/id_ed25519.pub
+
+# Windows (PowerShell)
+type $env:USERPROFILE\.ssh\id_ed25519.pub
+
+# Windows (Git Bash)
+cat ~/.ssh/id_ed25519.pub
+```
+
+#### 3. Aggiungi chiave a GitHub
+
+1. Vai su GitHub → Settings → SSH and GPG keys
+2. Click "New SSH key"
+3. Title: "Il mio computer" (o nome descrittivo)
+4. Incolla la chiave pubblica copiata
+5. Click "Add SSH key"
+
+#### 4. Testa la connessione
+
+```bash
+ssh -T git@github.com
+
+# Output atteso:
+# Hi username! You've successfully authenticated, but GitHub does not provide shell access.
+```
+
+#### 5. Configura Git (prima volta)
+
+```bash
+git config --global user.name "Tuo Nome"
+git config --global user.email "tua_email@example.com"
+```
+
+### Accesso SSH a SiteGround (Produzione)
+
+**Server di produzione:** tirocinio.clementeteodonno.it
+
+#### Informazioni Connessione
+
+| Parametro | Valore |
+|-----------|--------|
+| **Host** | tirocinio.clementeteodonno.it |
+| **User** | `beweb` (o utente fornito da SiteGround) |
+| **Port** | 22 (SSH standard) |
+| **Protocol** | SSH/SFTP |
+| **Web Root** | `/home/customer/www/tirocinio.clementeteodonno.it/public_html` |
+
+#### Configurare SSH per SiteGround
+
+##### Metodo 1: Chiave SSH (raccomandato per sicurezza)
+
+**1. Genera chiave dedicata per SiteGround:**
+
+```bash
+# Genera chiave separata per produzione
+ssh-keygen -t ed25519 -C "siteground-production" -f ~/.ssh/id_siteground
+
+# Copia chiave pubblica
+cat ~/.ssh/id_siteground.pub
+```
+
+**2. Aggiungi chiave a SiteGround:**
+
+1. Login su SiteGround cPanel
+2. Vai su **"SSH Keys Manager"**
+3. Click **"Import Key"**
+4. Incolla la chiave pubblica
+5. Autorizza la chiave
+
+**3. Configura SSH client locale:**
+
+Crea/edita `~/.ssh/config`:
+
+```bash
+# Linux/Mac
+nano ~/.ssh/config
+
+# Windows
+notepad %USERPROFILE%\.ssh\config
+```
+
+Aggiungi questa configurazione:
+
+```
+# SiteGround Production Server
+Host siteground-prod
+    HostName tirocinio.clementeteodonno.it
+    User beweb
+    Port 22
+    IdentityFile ~/.ssh/id_siteground
+    IdentitiesOnly yes
+    ServerAliveInterval 60
+```
+
+**4. Testa connessione:**
+
+```bash
+# Connessione semplificata
+ssh siteground-prod
+
+# Oppure connessione diretta
+ssh beweb@tirocinio.clementeteodonno.it
+```
+
+##### Metodo 2: Password (meno sicuro, ma più semplice)
+
+```bash
+# Connessione con password
+ssh beweb@tirocinio.clementeteodonno.it
+
+# Inserisci password quando richiesto
+```
+
+**Nota:** La password viene fornita da SiteGround nel pannello di controllo.
+
+#### Comandi Comuni SSH su SiteGround
+
+```bash
+# Connettiti
+ssh siteground-prod
+
+# Vai alla directory dell'app
+cd /home/customer/www/tirocinio.clementeteodonno.it/public_html
+
+# Verifica file
+ls -la
+
+# Pull ultimi aggiornamenti
+git pull origin main
+
+# Aggiorna dipendenze
+composer install --no-dev
+
+# Verifica permessi
+ls -la public/
+
+# Esci
+exit
+```
+
+### Accesso SFTP/FTP (per trasferimento file)
+
+Se preferisci un client grafico:
+
+#### FileZilla / WinSCP
+
+| Campo | Valore |
+|-------|--------|
+| **Protocol** | SFTP (SSH File Transfer Protocol) |
+| **Host** | tirocinio.clementeteodonno.it |
+| **Port** | 22 |
+| **User** | beweb |
+| **Password** | (fornita da SiteGround) |
+| **Chiave privata** | `~/.ssh/id_siteground` (se usi SSH key) |
+
+#### VS Code Remote SSH
+
+Installa estensione "Remote - SSH" e aggiungi:
+
+```json
+// settings.json
+{
+  "remote.SSH.configFile": "~/.ssh/config"
+}
+```
+
+Poi: F1 → "Remote-SSH: Connect to Host" → selezione "siteground-prod"
+
+### Recuperare Credenziali SiteGround
+
+Se non hai le credenziali SSH:
+
+1. Login su **SiteGround Site Tools**
+2. Vai su **"Devs" → "SSH Keys Manager"**
+3. Troverai:
+   - Username SSH
+   - Host
+   - Porta
+   - Opzioni per chiavi SSH
+
+**Oppure contatta:** support@siteground.com con i dettagli del tuo account
+
+### Best Practices SSH
+
+#### Sicurezza
+
+1. ✅ **Usa chiavi SSH invece di password**
+2. ✅ **Proteggi chiavi private con passphrase**
+3. ✅ **Non condividere mai chiavi private** (solo pubbliche)
+4. ✅ **Usa chiavi diverse per GitHub e server produzione**
+5. ✅ **Revoca chiavi compromesse immediatamente**
+
+#### Backup Chiavi
+
+```bash
+# Backup chiavi SSH
+cp -r ~/.ssh ~/backup_ssh_$(date +%Y%m%d)
+
+# O comprimilo
+tar -czf ssh_backup_$(date +%Y%m%d).tar.gz ~/.ssh/
+```
+
+#### Permessi Corretti
+
+```bash
+# Le chiavi devono avere permessi restrittivi
+chmod 700 ~/.ssh
+chmod 600 ~/.ssh/id_*
+chmod 644 ~/.ssh/id_*.pub
+chmod 600 ~/.ssh/config
+```
+
+### Workflow Git Completo
+
+```bash
+# 1. Clone repository (prima volta)
+git clone git@github.com:BewebSolution/adhd-saas.git
+
+# 2. Crea feature branch
+git checkout -b claude/feature-name-session-id
+
+# 3. Fai modifiche e commit
+git add .
+git commit -m "Descrizione modifiche"
+
+# 4. Push al repository
+git push -u origin claude/feature-name-session-id
+
+# 5. Deploy su produzione (da locale)
+ssh siteground-prod "cd /home/customer/www/tirocinio.clementeteodonno.it/public_html && git pull origin main && composer install --no-dev"
+```
+
+### Troubleshooting SSH
+
+#### Problema: "Permission denied (publickey)"
+
+**Soluzione:**
+
+```bash
+# Verifica chiave sia caricata
+ssh-add -l
+
+# Aggiungi chiave all'agent
+ssh-add ~/.ssh/id_ed25519  # o id_siteground
+
+# Test verbose per debug
+ssh -vvv git@github.com
+ssh -vvv beweb@tirocinio.clementeteodonno.it
+```
+
+#### Problema: "Host key verification failed"
+
+**Soluzione:**
+
+```bash
+# Rimuovi vecchia chiave host
+ssh-keygen -R tirocinio.clementeteodonno.it
+
+# Riconnetti (accetterà nuova chiave)
+ssh beweb@tirocinio.clementeteodonno.it
+```
+
+#### Problema: Timeout connessione
+
+**Soluzione:**
+
+```bash
+# Verifica firewall non blocchi porta 22
+telnet tirocinio.clementeteodonno.it 22
+
+# Usa porta alternativa se SiteGround fornisce
+ssh -p 18765 beweb@tirocinio.clementeteodonno.it
+```
+
+### Link Utili
+
+- **GitHub SSH Docs:** https://docs.github.com/en/authentication/connecting-to-github-with-ssh
+- **SiteGround SSH Tutorial:** https://www.siteground.com/kb/how_to_use_ssh/
+- **Git Documentation:** https://git-scm.com/doc
 
 ---
 
