@@ -2,7 +2,7 @@
 
 > **Last Updated:** 2025-11-14
 > **Project:** Beweb ADHD Task Management SaaS
-> **Version:** 1.0
+> **Version:** 1.1 - Auto-Detection System
 > **Primary Language:** Italian (code comments), English (documentation)
 
 ---
@@ -278,7 +278,70 @@ These files are core to the application and changing them will break the entire 
 
 ## 🔄 Development Workflow
 
-### Local Setup (Windows - Laragon)
+### ⚡ Quick Setup (Qualsiasi Ambiente) - **RACCOMANDATO**
+
+```bash
+# 1. Clone repository
+git clone <repository-url>
+cd adhd-saas
+
+# 2. Run automatic setup (interactive)
+php setup.php
+
+# Questo script configura automaticamente:
+# - Composer dependencies
+# - File .env con auto-detection di path e domini
+# - Database connection e creazione DB
+# - Verifica permessi
+
+# 3. Configure web server DocumentRoot → public/
+# 4. Access application
+```
+
+**Lo script `setup.php` rileva automaticamente:**
+- ✅ Base path (nessun path hardcoded!)
+- ✅ Protocol (HTTP/HTTPS)
+- ✅ Domain e porta
+- ✅ Ambiente (locale/produzione)
+
+**Vedi:** [QUICKSTART.md](QUICKSTART.md) per guida dettagliata
+
+### Auto-Detection System
+
+**Nuovo sistema intelligente** che elimina problemi quando si sposta il progetto tra ambienti.
+
+**Come funziona:**
+
+```php
+// In app/helpers.php
+function auto_detect_base_path(): string {
+    // Se APP_BASE_PATH è specificato in .env, usalo
+    $envPath = env('APP_BASE_PATH');
+    if (!empty($envPath)) {
+        return $envPath;
+    }
+
+    // Altrimenti rileva automaticamente confrontando:
+    // DOCUMENT_ROOT vs SCRIPT_FILENAME
+    $documentRoot = $_SERVER['DOCUMENT_ROOT'];
+    $scriptPath = dirname($_SERVER['SCRIPT_FILENAME']);
+
+    // Se public/ è in root → base path vuoto
+    // Altrimenti calcola path relativo
+}
+```
+
+**Vantaggi:**
+- ✅ Funziona su localhost, Laragon, XAMPP, server produzione
+- ✅ Nessuna modifica manuale di path
+- ✅ Stesso codice per tutti gli ambienti
+- ✅ Spostamento locale ↔ remoto senza rotture
+
+### Local Setup (Manuale - Opzionale)
+
+Se preferisci configurare manualmente senza `setup.php`:
+
+#### Windows (Laragon)
 
 ```bash
 # 1. Clone repository
@@ -291,12 +354,11 @@ composer install
 
 # 3. Configure environment
 copy .env.example .env
-# Edit .env with your database credentials
+# Lascia APP_BASE_PATH vuoto per auto-detection
+nano .env
 
 # 4. Create database
-# Open HeidiSQL or phpMyAdmin
-# Create database: beweb_app (utf8mb4_unicode_ci)
-# Import schema if available
+# Open HeidiSQL: CREATE DATABASE beweb_app
 
 # 5. Configure virtual host (auto in Laragon)
 # Access: http://beweb-app.test
@@ -306,7 +368,7 @@ php test_login.php
 php test_smart_focus.php
 ```
 
-### Local Setup (Linux)
+#### Linux
 
 ```bash
 # 1. Clone repository
@@ -319,7 +381,8 @@ composer install
 
 # 3. Configure environment
 cp .env.example .env
-nano .env  # Edit with your settings
+# Lascia APP_BASE_PATH vuoto per auto-detection
+nano .env
 
 # 4. Set permissions
 chmod 755 app config public

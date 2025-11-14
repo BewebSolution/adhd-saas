@@ -12,10 +12,10 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
     <!-- Intro.js CSS (locale) -->
-    <link rel="stylesheet" href="/assets/introjs.min.css">
+    <link rel="stylesheet" href="<?= asset('assets/introjs.min.css') ?>">
 
     <!-- Custom CSS (include stili Intro.js personalizzati) -->
-    <link rel="stylesheet" href="/assets/style.css">
+    <link rel="stylesheet" href="<?= asset('assets/style.css') ?>">
 </head>
 <body>
     <?php if (is_logged_in()): ?>
@@ -165,12 +165,12 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <!-- Intro.js (locale) -->
-    <script src="/assets/intro.min.js"></script>
+    <script src="<?= asset('assets/intro.min.js') ?>"></script>
 
     <!-- Custom JS -->
-    <script src="/assets/app.js"></script>
+    <script src="<?= asset('assets/app.js') ?>"></script>
 
     <!-- Onboarding Tour JS -->
-    <script src="/assets/onboarding.js"></script>
+    <script src="<?= asset('assets/onboarding.js') ?>"></script>
 </body>
 </html>

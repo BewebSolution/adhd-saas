@@ -31,9 +31,9 @@ $routes = require __DIR__ . '/../config/routes.php';
 $method = $_SERVER['REQUEST_METHOD'];
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-// Remove base path if running in subdirectory
-$basePath = '/tirocinio/beweb-app/public';
-if (strpos($uri, $basePath) === 0) {
+// Remove base path if running in subdirectory (auto-detect)
+$basePath = auto_detect_base_path();
+if (!empty($basePath) && strpos($uri, $basePath) === 0) {
     $uri = substr($uri, strlen($basePath));
 }
 if (empty($uri)) {

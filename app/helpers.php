@@ -194,13 +194,47 @@ function json_response(array $data, int $code = 200): void {
 }
 
 /**
+ * Auto-detect base path from document root
+ */
+function auto_detect_base_path(): string {
+    static $cached = null;
+
+    if ($cached !== null) {
+        return $cached;
+    }
+
+    // Se specificato in .env, usalo
+    $envPath = env('APP_BASE_PATH');
+    if (!empty($envPath)) {
+        $cached = $envPath;
+        return $cached;
+    }
+
+    // Auto-detect: confronta DOCUMENT_ROOT con lo script path
+    $documentRoot = rtrim($_SERVER['DOCUMENT_ROOT'] ?? '', '/');
+    $scriptPath = dirname($_SERVER['SCRIPT_FILENAME'] ?? '');
+
+    // Se public/ è nella root, base path è vuoto
+    if ($documentRoot === $scriptPath) {
+        $cached = '';
+        return $cached;
+    }
+
+    // Altrimenti calcola il path relativo
+    $basePath = str_replace($documentRoot, '', dirname($scriptPath));
+    $cached = $basePath ?: '';
+
+    return $cached;
+}
+
+/**
  * Get current URL path (without base path)
  */
 function current_path(): string {
     $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $basePath = env('APP_BASE_PATH', '/tirocinio/public_html');
+    $basePath = auto_detect_base_path();
 
-    if (strpos($uri, $basePath) === 0) {
+    if (!empty($basePath) && strpos($uri, $basePath) === 0) {
         $uri = substr($uri, strlen($basePath));
     }
     if (empty($uri)) {
@@ -288,14 +322,63 @@ function is_external_link(string $url): bool {
  * Generate asset URL with proper base path
  */
 function asset(string $path): string {
-    $basePath = env('APP_ASSET_PATH', '/tirocinio/public_html');
-    return rtrim($basePath, '/') . '/' . ltrim($path, '/');
+    // Usa APP_ASSET_PATH se specificato, altrimenti usa il base path auto-detected
+    $assetPath = env('APP_ASSET_PATH');
+    if (empty($assetPath)) {
+        $assetPath = auto_detect_base_path();
+    }
+
+    if (empty($assetPath)) {
+        return '/' . ltrim($path, '/');
+    }
+
+    return rtrim($assetPath, '/') . '/' . ltrim($path, '/');
 }
 
 /**
  * Generate URL with proper base path
  */
 function url(string $path): string {
-    $basePath = env('APP_BASE_PATH', '/tirocinio/public_html');
+    $basePath = auto_detect_base_path();
+
+    if (empty($basePath)) {
+        return '/' . ltrim($path, '/');
+    }
+
     return rtrim($basePath, '/') . '/' . ltrim($path, '/');
+}
+
+/**
+ * Get base URL (protocol + domain + base path)
+ */
+function base_url(): string {
+    static $cached = null;
+
+    if ($cached !== null) {
+        return $cached;
+    }
+
+    // Se specificato in .env, usalo
+    $envUrl = env('APP_URL');
+    if (!empty($envUrl)) {
+        $cached = rtrim($envUrl, '/');
+        return $cached;
+    }
+
+    // Auto-detect protocol
+    $isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https')
+        || (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && $_SERVER['HTTP_X_FORWARDED_SSL'] === 'on')
+        || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+
+    $protocol = $isHttps ? 'https' : 'http';
+
+    // Get host
+    $host = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
+
+    // Get base path
+    $basePath = auto_detect_base_path();
+
+    $cached = $protocol . '://' . $host . $basePath;
+    return $cached;
 }
