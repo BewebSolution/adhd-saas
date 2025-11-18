@@ -17,13 +17,13 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- SB Admin 2 CSS -->
-    <link href="<?= asset('assets/sb-admin-2.min.css') ?>" rel="stylesheet">
+    <link href="<?= asset('sb-admin-2.min.css') ?>" rel="stylesheet">
 
-    <!-- Custom CSS -->
-    <link href="<?= asset('assets/custom-sb.css') ?>" rel="stylesheet">
+    <!-- Custom CSS (se esiste) -->
+    <!-- <link href="<?= asset('custom-sb.css') ?>" rel="stylesheet"> -->
 
     <!-- Intro.js CSS -->
-    <link rel="stylesheet" href="<?= asset('assets/introjs.min.css') ?>">
+    <link rel="stylesheet" href="<?= asset('introjs.min.css') ?>">
 </head>
 
 <body id="page-top">
@@ -290,7 +290,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
 
     <!-- SB Admin 2 JS -->
-    <script src="<?= asset('assets/sb-admin-2.min.js') ?>"></script>
+    <script src="<?= asset('sb-admin-2.min.js') ?>"></script>
 
     <!-- Base URL for JavaScript -->
     <script>
@@ -303,16 +303,16 @@
     </script>
 
     <!-- SB Admin 2 JavaScript (già caricato sopra)-->
-    <script src="<?= asset('assets/sb-admin-2.min.js') ?>"></script>
+    <!-- <script src="<?= asset('sb-admin-2.min.js') ?>"></script> -->
 
     <!-- Intro.js -->
-    <script src="<?= asset('assets/intro.min.js') ?>"></script>
+    <script src="<?= asset('intro.min.js') ?>"></script>
 
     <!-- Custom JS -->
-    <script src="<?= asset('assets/app.js') ?>"></script>
+    <script src="<?= asset('app.js') ?>"></script>
 
     <!-- Onboarding Tour JS (must be last) -->
-    <script src="<?= asset('assets/onboarding.js') ?>"></script>
+    <script src="<?= asset('onboarding.js') ?>"></script>
 
     <!-- Fix per compatibilità SB Admin 2 con Bootstrap 5 -->
     <style>

@@ -35,15 +35,14 @@ $method = $_SERVER['REQUEST_METHOD'];
 $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 // Remove base path if running in subdirectory
-$basePath = $config->get('base_path', '');
-if (!empty($basePath)) {
-    // Add /public to base path for matching
-    $publicBasePath = $basePath . '/public';
-    if (strpos($uri, $publicBasePath) === 0) {
-        $uri = substr($uri, strlen($publicBasePath));
-    } elseif (strpos($uri, $basePath) === 0) {
-        $uri = substr($uri, strlen($basePath));
-    }
+// In locale il base path include già /public, in produzione è vuoto
+if ($config->isLocal()) {
+    $basePath = '/tirocinio/beweb-app/public';
+} else {
+    $basePath = $config->get('base_path', '');
+}
+if (!empty($basePath) && strpos($uri, $basePath) === 0) {
+    $uri = substr($uri, strlen($basePath));
 }
 if (empty($uri)) {
     $uri = '/';
