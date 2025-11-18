@@ -49,7 +49,7 @@
                             <button onclick="syncGoogleTasks()" class="btn btn-primary btn-lg me-2">
                                 <i class="fas fa-sync"></i> 🔄 SINCRONIZZA ORA
                             </button>
-                            <button onclick="syncWithAI()" class="btn btn-primary btn-lg me-2" id="syncWithAIBtn">
+                            <button onclick="importAllWithAI()" class="btn btn-primary btn-lg me-2" id="syncWithAIBtn">
                                 <i class="fas fa-magic"></i> 🤖 Importa con AI
                             </button>
                             <button onclick="disconnectGoogle()" class="btn btn-outline-danger btn-sm">
@@ -459,19 +459,96 @@ function syncGoogleTasks() {
     });
 }
 
-// NEW: Phase 2 - Process with AI
+// Import ALL tasks with AI (no selection needed)
+async function importAllWithAI() {
+    // First sync to get latest tasks
+    const syncBtn = event.target;
+    const originalHtml = syncBtn.innerHTML;
+    syncBtn.disabled = true;
+    syncBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sincronizzando...';
+
+    try {
+        // Step 1: Sync tasks from Google
+        const syncResponse = await fetch(url('/ai/import/sync'), {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'csrf_token=<?= csrf_token() ?>'
+        });
+
+        const syncData = await syncResponse.json();
+
+        if (!syncData.success) {
+            throw new Error(syncData.error || 'Errore durante la sincronizzazione');
+        }
+
+        showToast(`Sincronizzati ${syncData.data.total_tasks} task. Processamento AI in corso...`, 'info');
+
+        // Step 2: Process ALL with AI
+        syncBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>🤖 Processando con AI...';
+
+        const aiResponse = await fetch(url('/ai/import/process-with-ai'), {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: 'csrf_token=<?= csrf_token() ?>'
+        });
+
+        const aiData = await aiResponse.json();
+
+        if (aiData.success) {
+            displaySyncResults(aiData.data);
+            showToast(`✅ ${aiData.data.processed} task processati con AI`, 'success');
+        } else {
+            throw new Error(aiData.error || 'Errore durante il processamento AI');
+        }
+
+    } catch (error) {
+        console.error('Error:', error);
+        showToast(error.message, 'error');
+    } finally {
+        syncBtn.disabled = false;
+        syncBtn.innerHTML = originalHtml;
+    }
+}
+
+// NEW: Phase 2 - Process SELECTED tasks with AI
 function processWithAI() {
     const btn = event.target.closest('button');
     const originalHtml = btn.innerHTML;
+
+    // Get selected tasks
+    const checkboxes = document.querySelectorAll('#syncResultsContent input[type="checkbox"]:checked:not(#delete_after_import)');
+
+    if (checkboxes.length === 0) {
+        showToast('Seleziona almeno un task da processare con AI', 'warning');
+        return;
+    }
+
+    const selectedTasks = [];
+    checkboxes.forEach(cb => {
+        try {
+            const taskData = JSON.parse(cb.dataset.task || '{}');
+            if (taskData.id) {
+                selectedTasks.push(taskData);
+            }
+        } catch (e) {
+            console.error('Error parsing task data:', e);
+        }
+    });
+
+    if (selectedTasks.length === 0) {
+        showToast('Nessun task valido selezionato', 'error');
+        return;
+    }
+
     btn.disabled = true;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>🤖 Processing AI (può richiedere 30-60 secondi)...';
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>🤖 Processing ${selectedTasks.length} task con AI...`;
 
-    showToast('Processamento AI in corso... Attendere prego.', 'info');
+    showToast(`Processamento AI di ${selectedTasks.length} task in corso...`, 'info');
 
-    fetch(url('/ai/import/process-with-ai'), {
+    fetch(url('/ai/import/process-selected-with-ai'), {
         method: 'POST',
         headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-        body: 'csrf_token=<?= csrf_token() ?>'
+        body: 'csrf_token=<?= csrf_token() ?>&tasks=' + encodeURIComponent(JSON.stringify(selectedTasks))
     })
     .then(response => response.json())
     .then(data => {
