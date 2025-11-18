@@ -91,18 +91,24 @@ class GoogleTasksService {
 
                     // Verifica che il refresh abbia restituito un token valido
                     if (!isset($newTokens['access_token'])) {
-                        error_log('Failed to refresh Google token: Invalid token format');
-                        throw new Exception('Invalid token format');
+                        error_log('Failed to refresh Google token: Invalid token format - clearing invalid tokens');
+                        // Elimina i token invalidi invece di lanciare eccezione
+                        $this->disconnect();
+                        return; // Esce dal metodo, l'utente dovrà riautenticarsi
                     }
 
-                    if ($this->saveTokens($newTokens)) {
-                        $this->client->setAccessToken($newTokens); // Importante: imposta i nuovi token nel client
-                    } else {
-                        throw new Exception('Failed to save refreshed tokens');
+                    if (!$this->saveTokens($newTokens)) {
+                        error_log('Failed to save refreshed tokens - clearing invalid tokens');
+                        $this->disconnect();
+                        return;
                     }
+
+                    $this->client->setAccessToken($newTokens);
                 } catch (\Exception $e) {
-                    error_log('Failed to refresh Google token: ' . $e->getMessage());
-                    throw new Exception('Failed to refresh Google token: Invalid token format');
+                    error_log('Failed to refresh Google token: ' . $e->getMessage() . ' - clearing invalid tokens');
+                    // NON lanciare eccezione, elimina i token invalidi
+                    $this->disconnect();
+                    return; // L'utente dovrà riautenticarsi
                 }
             }
 
