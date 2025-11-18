@@ -484,35 +484,6 @@ IMPORTANTE: Se non c'è una corrispondenza chiara (confidence < 50), ritorna nul
     }
 
     /**
-     * Check for duplicates in existing tasks
-     */
-    public function checkDuplicate(string $title, int $projectId): ?array {
-        $db = get_db();
-
-        // Direct simple comparison (LEVENSHTEIN not available in standard MySQL)
-        // Check for exact or similar titles in the same project
-        $stmt = $db->prepare('
-            SELECT id, title, status
-            FROM tasks
-            WHERE project_id = ?
-            AND status != "Fatto"
-            AND (
-                title = ?
-                OR LOWER(title) = LOWER(?)
-                OR title LIKE ?
-            )
-            LIMIT 1
-        ');
-
-        // Search for exact match or partial match
-        $searchPattern = '%' . substr($title, 0, min(strlen($title), 20)) . '%';
-        $stmt->execute([$projectId, $title, $title, $searchPattern]);
-        $duplicate = $stmt->fetch();
-
-        return $duplicate ?: null;
-    }
-
-    /**
      * Basic title cleaning without AI
      */
     private function basicCleanTitle(string $title): string {
