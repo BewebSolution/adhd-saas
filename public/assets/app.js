@@ -250,4 +250,344 @@ document.addEventListener('DOMContentLoaded', function() {
     const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
 });
 
-console.log('Beweb Tirocinio App - JS Loaded');
+// ========== SMART FOCUS ADHD FUNCTIONS ==========
+
+/**
+ * Get Smart Focus suggestion - Cosa fare ora?
+ */
+function getSmartFocus() {
+    const btn = document.getElementById('smartFocusBtn');
+    const resultDiv = document.getElementById('smartFocusResult');
+
+    // Disabilita pulsante durante caricamento
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analizzo...';
+    }
+
+    // Raccogli stato utente
+    const userInput = {
+        energy: document.querySelector('input[name="energyLevel"]:checked')?.value || 'medium',
+        focus_time: document.getElementById('focusTime')?.value || '45',
+        mood: document.querySelector('input[name="moodLevel"]:checked')?.value || 'neutral'
+    };
+
+    // Prepara form data
+    const formData = new FormData();
+    formData.append('csrf_token', document.querySelector('input[name="csrf_token"]')?.value || '');
+    formData.append('energy', userInput.energy);
+    formData.append('focus_time', userInput.focus_time);
+    formData.append('mood', userInput.mood);
+
+    // Chiamata API
+    fetch(url('/ai/smart-focus'), {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayADHDFocusResult(data.data);
+
+            // Aggiorna contatori se disponibili
+            updateTaskCounters(data.data);
+        } else {
+            showToast(data.error || 'Errore nel caricamento suggerimenti', 'error');
+            if (resultDiv) {
+                resultDiv.innerHTML = `
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        ${data.error || 'Servizio temporaneamente non disponibile. Riprova tra poco.'}
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Smart Focus Error:', error);
+        showToast('Errore di connessione. Riprova.', 'error');
+        if (resultDiv) {
+            resultDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Errore di connessione. Verifica la tua connessione e riprova.
+                </div>
+            `;
+            resultDiv.style.display = 'block';
+        }
+    })
+    .finally(() => {
+        // Riabilita pulsante
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-flag-checkered"></i> COSA FINISCO OGGI?';
+        }
+    });
+}
+
+/**
+ * Get Quick Win - Task veloce per energia bassa
+ */
+function getQuickWin() {
+    const btn = document.getElementById('quickWinBtn');
+    const resultDiv = document.getElementById('smartFocusResult');
+
+    // Disabilita pulsante
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cerco...';
+    }
+
+    // Quick win = bassa energia, 15 min max
+    const formData = new FormData();
+    formData.append('csrf_token', document.querySelector('input[name="csrf_token"]')?.value || '');
+    formData.append('energy', 'low');
+    formData.append('focus_time', '15');
+    formData.append('mood', document.querySelector('input[name="moodLevel"]:checked')?.value || 'tired');
+    formData.append('quick_win', 'true');
+
+    fetch(url('/ai/smart-focus'), {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Modifica display per quick win
+            if (data.data) {
+                data.data.is_quick_win = true;
+                displayADHDFocusResult(data.data);
+            }
+        } else {
+            showToast('Nessun quick win disponibile', 'warning');
+        }
+    })
+    .catch(error => {
+        console.error('Quick Win Error:', error);
+        showToast('Errore nel caricamento quick win', 'error');
+    })
+    .finally(() => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-trophy"></i> Quick Win (5 min)';
+        }
+    });
+}
+
+/**
+ * Display ADHD-optimized focus result
+ */
+function displayADHDFocusResult(data) {
+    const resultDiv = document.getElementById('smartFocusResult');
+    if (!resultDiv) return;
+
+    // Check message type
+    if (data.type === 'no_tasks') {
+        resultDiv.innerHTML = `
+            <div class="alert alert-success">
+                <h5 class="alert-heading"><i class="fas fa-check-circle"></i> Tutto completato!</h5>
+                <p class="mb-0">${data.message || 'Nessuna attività da fare! Prenditi una pausa.'}</p>
+            </div>
+        `;
+        resultDiv.style.display = 'block';
+        return;
+    }
+
+    // Main suggestion with alternatives
+    if (data.primary_task || data.task) {
+        const primary = data.primary_task || data.task;
+        const isQuickWin = data.is_quick_win || false;
+
+        let html = `
+            <div class="card border-${isQuickWin ? 'success' : 'warning'}">
+                <div class="card-header bg-${isQuickWin ? 'success' : 'warning'} text-${isQuickWin ? 'white' : 'dark'}">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-${isQuickWin ? 'trophy' : 'flag-checkered'}"></i>
+                            ${isQuickWin ? 'Quick Win!' : 'Piano d\'azione ADHD'}
+                        </h5>
+                        ${data.strategy ? `<span class="badge bg-dark">${getStrategyLabel(data.strategy)}</span>` : ''}
+                    </div>
+                </div>
+                <div class="card-body">`;
+
+        // Motivazione
+        if (data.motivation) {
+            html += `
+                <div class="alert alert-${isQuickWin ? 'success' : 'info'} mb-3">
+                    <i class="fas fa-lightbulb"></i> <strong>${data.motivation}</strong>
+                </div>`;
+        }
+
+        // Task principale
+        html += `
+            <div class="mb-4">
+                <h5 class="text-${isQuickWin ? 'success' : 'primary'} mb-2">
+                    <i class="fas fa-crosshairs"></i> ${isQuickWin ? 'VITTORIA FACILE' : 'FOCUS PRIMARIO'}
+                </h5>
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="card-title">${escapeHtml(primary.title || 'Task')}</h4>
+                        <div class="mb-2">
+                            ${primary.project_name ? `<span class="badge bg-info me-2"><i class="fas fa-project-diagram"></i> ${escapeHtml(primary.project_name)}</span>` : ''}
+                            <span class="badge bg-${getPriorityColor(primary.priority)} me-2">${primary.priority || 'Media'}</span>
+                            <span class="badge bg-secondary">${primary.status || 'Da fare'}</span>
+                        </div>`;
+
+        // Reason e dettagli
+        if (data.reason || primary.reason) {
+            html += `
+                <div class="alert alert-info mb-2">
+                    <strong>Perché questo:</strong> ${data.reason || primary.reason}
+                </div>`;
+        }
+
+        // Tempo stimato
+        if (data.estimated_focus_time || primary.estimated_time) {
+            html += `
+                <p class="mb-2">
+                    <i class="fas fa-clock"></i> <strong>Tempo stimato:</strong>
+                    ${data.estimated_focus_time || primary.estimated_time || '30 minuti'}
+                </p>`;
+        }
+
+        // Pulsanti azione
+        html += `
+            <div class="d-grid gap-2 d-md-flex">
+                <a href="${url('/tasks/' + primary.id)}" class="btn btn-${isQuickWin ? 'success' : 'warning'} btn-lg">
+                    <i class="fas fa-play"></i> ${isQuickWin ? 'FAI SUBITO!' : 'INIZIA ORA'}
+                </a>
+                <button onclick="markAsStarted(${primary.id})" class="btn btn-outline-success">
+                    <i class="fas fa-check"></i> Ho iniziato!
+                </button>
+            </div>
+        </div>
+    </div>
+</div>`;
+
+        // Alternative se disponibili
+        if (data.alternatives && data.alternatives.length > 0) {
+            html += `
+                <div class="mb-3">
+                    <h6 class="text-secondary mb-2">
+                        <i class="fas fa-exchange-alt"></i> Altre opzioni disponibili
+                    </h6>
+                    <div class="row g-2">`;
+
+            data.alternatives.forEach(alt => {
+                html += `
+                    <div class="col-md-6">
+                        <div class="card bg-light h-100">
+                            <div class="card-body">
+                                <strong>${escapeHtml(alt.task.title)}</strong>
+                                ${alt.reason ? `<br><small class="text-muted">${escapeHtml(alt.reason)}</small>` : ''}
+                                <div class="mt-2">
+                                    <a href="${url('/tasks/' + alt.task.id)}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-arrow-right"></i> Vai
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+            });
+
+            html += `</div></div>`;
+        }
+
+        // Pulsante refresh
+        html += `
+            <div class="text-center mt-3">
+                <button onclick="getSmartFocus()" class="btn btn-outline-secondary">
+                    <i class="fas fa-redo"></i> Dammi un'altra opzione
+                </button>
+            </div>
+        </div>
+    </div>`;
+
+        resultDiv.innerHTML = html;
+        resultDiv.style.display = 'block';
+
+        // Scroll to result
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+/**
+ * Mark task as started
+ */
+function markAsStarted(taskId) {
+    showToast('Ottimo! Continua così! 💪', 'success');
+
+    // Potrebbe aggiornare lo stato del task via API
+    // Per ora solo feedback positivo
+
+    // Nascondi risultato dopo 2 secondi
+    setTimeout(() => {
+        const resultDiv = document.getElementById('smartFocusResult');
+        if (resultDiv) {
+            resultDiv.style.display = 'none';
+        }
+    }, 2000);
+}
+
+/**
+ * Update task counters in UI
+ */
+function updateTaskCounters(data) {
+    if (data.stats) {
+        const openCount = document.getElementById('openTasksCount');
+        const urgentCount = document.getElementById('urgentCount');
+
+        if (openCount && data.stats.open_tasks !== undefined) {
+            openCount.textContent = data.stats.open_tasks;
+        }
+        if (urgentCount && data.stats.urgent_tasks !== undefined) {
+            urgentCount.textContent = data.stats.urgent_tasks;
+        }
+    }
+}
+
+/**
+ * Get priority color for badge
+ */
+function getPriorityColor(priority) {
+    switch(priority) {
+        case 'Alta': return 'danger';
+        case 'Media': return 'warning';
+        case 'Bassa': return 'info';
+        default: return 'secondary';
+    }
+}
+
+/**
+ * Get strategy label
+ */
+function getStrategyLabel(strategy) {
+    const labels = {
+        'overdue': '⚠️ Scaduto',
+        'due_today': '📅 Scade oggi',
+        'quick_win': '🏆 Quick Win',
+        'in_progress': '🔄 In corso',
+        'important': '🎯 Importante',
+        'morning_focus': '🌅 Focus mattutino',
+        'afternoon_task': '☀️ Task pomeridiano',
+        'easy_start': '✨ Inizio facile',
+        'deep_work': '🧠 Deep Work'
+    };
+    return labels[strategy] || strategy;
+}
+
+// Auto-load Smart Focus on dashboard if no tasks in progress
+document.addEventListener('DOMContentLoaded', function() {
+    // Check if we're on dashboard
+    if (window.location.pathname === '/' || window.location.pathname.includes('dashboard')) {
+        const smartFocusBtn = document.getElementById('smartFocusBtn');
+        if (smartFocusBtn) {
+            // Opzionale: carica automaticamente suggerimenti dopo 2 secondi
+            // setTimeout(() => { getSmartFocus(); }, 2000);
+        }
+    }
+});
+
+console.log('Beweb Tirocinio App - JS Loaded (with Smart Focus)');
