@@ -35,6 +35,11 @@
                                     <i class="fas fa-trophy"></i> Quick Win (5 min)
                                 </button>
                             </div>
+                            <div class="col-auto">
+                                <button onclick="pomodoro.toggleExpanded()" class="btn btn-danger btn-lg" id="pomodoroMainBtn">
+                                    <i class="fas fa-clock"></i> 🍅 POMODORO (25 min)
+                                </button>
+                            </div>
                         </div>
                     </div>
                     <div class="col-lg-4">

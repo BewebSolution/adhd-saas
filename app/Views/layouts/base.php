@@ -311,6 +311,9 @@
     <!-- Custom JS -->
     <script src="<?= asset('app.js') ?>"></script>
 
+    <!-- Pomodoro ADHD Timer -->
+    <script src="<?= asset('js/pomodoro-adhd.js') ?>"></script>
+
     <!-- Onboarding Tour JS (must be last) -->
     <script src="<?= asset('onboarding.js') ?>"></script>
 

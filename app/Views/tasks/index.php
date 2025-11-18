@@ -166,6 +166,10 @@
                                 </td>
                                 <td class="text-end">
                                     <div class="btn-group btn-group-sm"<?= $i === 0 ? ' data-intro="quick-actions-task"' : '' ?>>
+                                        <button onclick="PomodoroADHD.quickStart(<?= $task['id'] ?>, '<?= esc(addslashes($task['title'])) ?>')"
+                                                class="btn btn-danger" title="Avvia Pomodoro">
+                                            🍅
+                                        </button>
                                         <a href="<?= url('/tasks/' . $task['id']) ?>" class="btn btn-outline-primary" title="Visualizza">
                                             <i class="fas fa-eye"></i>
                                         </a>

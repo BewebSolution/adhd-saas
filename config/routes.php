@@ -78,6 +78,11 @@ return [
     ['GET', '/ai/settings', 'AIController@settings'],
     ['POST', '/ai/settings', 'AIController@updateSettings'],
 
+    // Pomodoro Timer (ADHD-optimized)
+    ['POST', '/ai/pomodoro-suggestion', 'PomodoroController@getAISuggestion'],
+    ['POST', '/pomodoro/log', 'PomodoroController@logSession'],
+    ['GET', '/pomodoro/stats', 'PomodoroController@getStats'],
+
     // Profile
     ['GET', '/profile', 'ProfileController@index'],
     ['POST', '/profile/update', 'ProfileController@update'],
