@@ -91,7 +91,8 @@ return [
     ['GET', '/ai/import/oauth-callback', 'AIImportController@oauthCallback'],
     ['POST', '/ai/import/disconnect', 'AIImportController@disconnect'],
     ['POST', '/ai/import/sync', 'AIImportController@sync'],  // Phase 1: Fast sync (RAW data only)
-    ['POST', '/ai/import/process-with-ai', 'AIImportController@processWithAI'],  // Phase 2: AI processing
+    ['POST', '/ai/import/process-with-ai', 'AIImportController@processWithAI'],  // Phase 2: AI processing (ALL tasks)
+    ['POST', '/ai/import/process-selected-with-ai', 'AIImportController@processSelectedWithAI'],  // Phase 2: AI processing (SELECTED tasks)
     ['POST', '/ai/import/sync-with-ai', 'AIImportController@syncWithAI'],  // Legacy: AI mapping
     ['POST', '/ai/import/confirm-ai-import', 'AIImportController@confirmAIImport'],  // Legacy: Confirm AI import
     ['POST', '/ai/import/import', 'AIImportController@import'],

@@ -48,20 +48,19 @@ class AIImportController {
         // Get import settings
         $settings = $this->getImportSettings();
 
-        // Check for saved AI processed tasks (persist across page refresh)
+        // Check for saved synced tasks (persist until next sync)
+        $savedTasks = null;
+        if (isset($_SESSION['google_tasks_raw'])) {
+            $savedTasks = $_SESSION['google_tasks_raw'];
+        }
+
+        // Check for saved AI processed tasks (persist until next sync)
         $savedAITasks = null;
         if (isset($_SESSION['google_tasks_ai_processed'])) {
             $savedAITasks = $_SESSION['google_tasks_ai_processed'];
-            $savedAITasksAge = time() - ($_SESSION['google_tasks_ai_timestamp'] ?? 0);
-            // Keep tasks for 1 hour
-            if ($savedAITasksAge > 3600) {
-                unset($_SESSION['google_tasks_ai_processed']);
-                unset($_SESSION['google_tasks_ai_timestamp']);
-                $savedAITasks = null;
-            }
         }
 
-        view('ai-import.index', compact('isConnected', 'authUrl', 'stats', 'mappings', 'settings', 'savedAITasks'));
+        view('ai-import.index', compact('isConnected', 'authUrl', 'stats', 'mappings', 'settings', 'savedTasks', 'savedAITasks'));
     }
 
     /**
@@ -160,11 +159,11 @@ class AIImportController {
                 $results['lists'][] = $listResult;
             }
 
-            // Store RAW data in session for later AI processing
+            // Store RAW data in session (persist until next sync)
             $_SESSION['google_tasks_raw'] = $results;
+            $_SESSION['google_tasks_sync_time'] = time();
 
-            // Clear any previous processed data
-            unset($_SESSION['google_tasks_preview']);
+            // NOTE: Do NOT clear previous processed data - keep it available
 
             json_response([
                 'success' => true,
@@ -180,7 +179,95 @@ class AIImportController {
     }
 
     /**
-     * Process raw tasks with AI (Phase 2 - separated from sync)
+     * Process SELECTED tasks with AI
+     * Called by "Processa con AI" button with selected tasks
+     */
+    public function processSelectedWithAI(): void {
+        if (!verify_csrf()) {
+            json_response(['error' => 'Token CSRF non valido'], 403);
+            return;
+        }
+
+        $selectedTasks = json_decode($_POST['tasks'] ?? '[]', true);
+
+        if (empty($selectedTasks)) {
+            json_response(['error' => 'Nessun task selezionato'], 400);
+            return;
+        }
+
+        try {
+            $results = [
+                'tasks' => [],
+                'total_tasks' => count($selectedTasks),
+                'processed' => 0,
+                'duplicates' => 0,
+                'errors' => []
+            ];
+
+            // Process only selected tasks with AI
+            $processedTasks = $this->aiCleaner->processBatch($selectedTasks);
+
+            foreach ($processedTasks as $processed) {
+                // Auto-assign project based on list name
+                $projectId = null;
+                $listName = $processed['original']['list_name'] ?? '';
+
+                if ($listName) {
+                    $projectModel = new Project();
+                    $project = $projectModel->findByName($listName);
+
+                    if ($project) {
+                        $projectId = $project['id'];
+                    } else {
+                        // Create new project
+                        $projectId = $projectModel->create([
+                            'name' => $listName,
+                            'description' => "Progetto creato automaticamente da Google Tasks",
+                            'status' => 'active'
+                        ]);
+                    }
+                }
+
+                // Check for duplicates
+                $duplicate = null;
+                if ($projectId) {
+                    $duplicate = $this->aiCleaner->checkDuplicate($processed['clean_title'], $projectId);
+                    if ($duplicate) {
+                        $results['duplicates']++;
+                    }
+                }
+
+                // Add to results
+                $results['tasks'][] = [
+                    'original' => $processed['original'],
+                    'processed' => $processed,
+                    'project_id' => $projectId,
+                    'status' => $duplicate ? 'duplicate' : 'ready',
+                    'duplicate_id' => $duplicate ? $duplicate['id'] : null
+                ];
+
+                if (!$duplicate) {
+                    $results['processed']++;
+                }
+            }
+
+            // Store for import phase
+            $_SESSION['google_tasks_selected_ai'] = $results;
+
+            json_response([
+                'success' => true,
+                'data' => $results,
+                'message' => "Processati {$results['processed']} task selezionati con AI"
+            ]);
+
+        } catch (\Exception $e) {
+            error_log('Selected AI Processing error: ' . $e->getMessage());
+            json_response(['error' => 'Errore durante il processamento AI: ' . $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Process ALL raw tasks with AI (Phase 2 - separated from sync)
      * Called by "Importa con AI" button after sync
      */
     public function processWithAI(): void {

@@ -600,4 +600,60 @@ IMPORTANTE: Se non c'è una corrispondenza chiara (confidence < 50), ritorna nul
 
         return $results;
     }
+
+    /**
+     * Check if a task already exists in the database
+     */
+    public function checkDuplicate(string $title, ?int $projectId = null): ?array {
+        try {
+            $db = get_db();
+
+            // First check exact match
+            $query = "SELECT id, title, project_id FROM tasks WHERE LOWER(title) = LOWER(?)";
+            $params = [$title];
+
+            if ($projectId) {
+                $query .= " AND project_id = ?";
+                $params[] = $projectId;
+            }
+
+            $stmt = $db->prepare($query);
+            $stmt->execute($params);
+            $exact = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($exact) {
+                return $exact;
+            }
+
+            // Check similar titles (using LIKE for broader matching)
+            $similarTitle = '%' . trim($title) . '%';
+            $query = "SELECT id, title, project_id FROM tasks WHERE title LIKE ?";
+            $params = [$similarTitle];
+
+            if ($projectId) {
+                $query .= " AND project_id = ?";
+                $params[] = $projectId;
+            }
+
+            $query .= " LIMIT 1";
+
+            $stmt = $db->prepare($query);
+            $stmt->execute($params);
+            $similar = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+            if ($similar) {
+                // Check similarity percentage
+                similar_text(strtolower($title), strtolower($similar['title']), $percent);
+                if ($percent > 80) {  // 80% similar = likely duplicate
+                    return $similar;
+                }
+            }
+
+            return null;
+
+        } catch (\Exception $e) {
+            error_log('Check duplicate error: ' . $e->getMessage());
+            return null;
+        }
+    }
 }
