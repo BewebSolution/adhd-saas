@@ -32,16 +32,9 @@ class GoogleTasksService {
      * Get dynamic redirect URI based on environment
      */
     private function getRedirectUri(): string {
-        // Check if we're in local environment
-        if (env('APP_ENV') === 'local') {
-            // Use local URL with base path
-            $baseUrl = rtrim(env('APP_URL', 'http://localhost'), '/');
-            $basePath = env('APP_BASE_PATH', '/tirocinio/public_html');
-            return $baseUrl . $basePath . '/ai/import/oauth-callback';
-        }
-
-        // Production URL
-        return 'https://tirocinio.clementeteodonno.it/ai/import/oauth-callback';
+        // Use AppConfig to get the correct URL
+        $config = \App\Config\AppConfig::getInstance();
+        return $config->url('ai/import/oauth-callback');
     }
 
     /**

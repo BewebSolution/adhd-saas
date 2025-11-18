@@ -3,16 +3,16 @@
 /**
  * Database Connection (PDO)
  * Singleton pattern - returns same instance
+ * Utilizza AppConfig per configurazione automatica
  */
 
 try {
-    $host = env('DB_HOST', '127.0.0.1');
-    $port = env('DB_PORT', '3306');
-    $database = env('DB_DATABASE', 'beweb_app');
-    $username = env('DB_USERNAME', 'root');
-    $password = env('DB_PASSWORD', '');
+    // Usa AppConfig per ottenere configurazione database
+    $config = \App\Config\AppConfig::getInstance();
+    $dbConfig = $config->getDatabaseConfig();
 
-    $dsn = "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4";
+    // Ottieni DSN
+    $dsn = $config->getDatabaseDSN();
 
     $options = [
         \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
@@ -21,16 +21,19 @@ try {
         \PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
     ];
 
-    $db = new \PDO($dsn, $username, $password, $options);
+    $db = new \PDO($dsn, $dbConfig['username'], $dbConfig['password'], $options);
 
 } catch (\PDOException $e) {
     // Log error
     error_log('Database Connection Error: ' . $e->getMessage());
 
     // Show user-friendly error in development
-    if (env('APP_DEBUG', false)) {
-        die('Errore di connessione al database: ' . $e->getMessage());
+    if ($config->isDebug()) {
+        die('Errore di connessione al database: ' . $e->getMessage() .
+            '<br>Host: ' . $dbConfig['host'] .
+            '<br>Database: ' . $dbConfig['database'] .
+            '<br>Username: ' . $dbConfig['username']);
     }
 
-    die('Errore di connessione al database. Verifica la configurazione in .env');
+    die('Errore di connessione al database. Verifica la configurazione.');
 }

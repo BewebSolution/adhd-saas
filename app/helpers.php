@@ -198,9 +198,10 @@ function json_response(array $data, int $code = 200): void {
  */
 function current_path(): string {
     $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $basePath = env('APP_BASE_PATH', '/tirocinio/public_html');
+    $config = \App\Config\AppConfig::getInstance();
+    $basePath = $config->get('base_path', '');
 
-    if (strpos($uri, $basePath) === 0) {
+    if (!empty($basePath) && strpos($uri, $basePath) === 0) {
         $uri = substr($uri, strlen($basePath));
     }
     if (empty($uri)) {
@@ -288,14 +289,12 @@ function is_external_link(string $url): bool {
  * Generate asset URL with proper base path
  */
 function asset(string $path): string {
-    $basePath = env('APP_ASSET_PATH', '/tirocinio/public_html');
-    return rtrim($basePath, '/') . '/' . ltrim($path, '/');
+    return \App\Config\AppConfig::getInstance()->asset($path);
 }
 
 /**
  * Generate URL with proper base path
  */
 function url(string $path): string {
-    $basePath = env('APP_BASE_PATH', '/tirocinio/public_html');
-    return rtrim($basePath, '/') . '/' . ltrim($path, '/');
+    return \App\Config\AppConfig::getInstance()->url($path);
 }

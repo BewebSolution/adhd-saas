@@ -294,7 +294,7 @@
 
     <!-- Base URL for JavaScript -->
     <script>
-        const BASE_URL = '<?= env('APP_BASE_PATH', '/tirocinio/public_html') ?>';
+        const BASE_URL = '<?= \App\Config\AppConfig::getInstance()->get('base_path', '') ?>';
 
         // Helper function for generating URLs in JavaScript
         function url(path) {
