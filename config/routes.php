@@ -68,6 +68,9 @@ return [
 
     // AI Features
     ['POST', '/ai/smart-focus', 'AIController@smartFocus'],
+    ['POST', '/ai/quick-win', 'AIController@quickWin'],
+    ['POST', '/ai/smart-focus/feedback', 'SmartFocusController@recordFeedback'],
+    ['POST', '/ai/smart-focus/feedback/detailed', 'SmartFocusController@recordDetailedFeedback'],
     ['POST', '/ai/suggestion-feedback/{id}', 'AIController@suggestionFeedback'],
     ['POST', '/ai/voice-to-task', 'AIController@voiceToTask'],
     ['POST', '/ai/task-breakdown/{id}', 'AIController@taskBreakdown'],

@@ -227,6 +227,153 @@ function fallbackCopyToClipboard(text) {
     document.body.removeChild(textArea);
 }
 
+// Smart Focus Feedback Functions
+function sendSmartFocusFeedback(taskId, wasHelpful, suggestionId) {
+    fetch(url('/ai/smart-focus/feedback'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            csrf_token: document.querySelector('meta[name="csrf-token"]')?.content || '',
+            task_id: taskId,
+            suggestion_id: suggestionId,
+            was_helpful: wasHelpful,
+            energy_level: document.querySelector('input[name="energyLevel"]:checked')?.value || null
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(wasHelpful ? '👍 Grazie per il feedback!' : '📝 Feedback registrato', 'success');
+            // Aggiorna UI per mostrare che il feedback è stato dato
+            const feedbackDiv = document.getElementById('smartFocusFeedback');
+            if (feedbackDiv) {
+                feedbackDiv.innerHTML = `
+                    <div class="alert alert-sm alert-success">
+                        <i class="fas fa-check-circle"></i> Feedback inviato. Grazie!
+                    </div>
+                `;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error sending feedback:', error);
+        showToast('Errore nell\'invio del feedback', 'error');
+    });
+}
+
+function showFeedbackModal(taskId, suggestionId) {
+    // Crea un modal Bootstrap per feedback dettagliato
+    const modalHtml = `
+        <div class="modal fade" id="feedbackModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Feedback Dettagliato</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Il suggerimento ti è stato utile?</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="helpful" id="helpful-yes" value="true" checked>
+                                <label class="btn btn-outline-success" for="helpful-yes">
+                                    <i class="fas fa-thumbs-up"></i> Sì
+                                </label>
+                                <input type="radio" class="btn-check" name="helpful" id="helpful-no" value="false">
+                                <label class="btn btn-outline-danger" for="helpful-no">
+                                    <i class="fas fa-thumbs-down"></i> No
+                                </label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Hai completato il task?</label>
+                            <div class="btn-group w-100" role="group">
+                                <input type="radio" class="btn-check" name="completed" id="completed-yes" value="true">
+                                <label class="btn btn-outline-success" for="completed-yes">Sì</label>
+                                <input type="radio" class="btn-check" name="completed" id="completed-no" value="false" checked>
+                                <label class="btn btn-outline-secondary" for="completed-no">Non ancora</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="timeSpent" class="form-label">Tempo impiegato (minuti)</label>
+                            <input type="number" class="form-control" id="timeSpent" min="5" step="5">
+                        </div>
+                        <div class="mb-3">
+                            <label for="feedbackComment" class="form-label">Commento (opzionale)</label>
+                            <textarea class="form-control" id="feedbackComment" rows="3"
+                                placeholder="Cosa ha funzionato? Cosa miglioreresti?"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annulla</button>
+                        <button type="button" class="btn btn-primary" onclick="submitDetailedFeedback(${taskId}, '${suggestionId}')">
+                            <i class="fas fa-paper-plane"></i> Invia Feedback
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Rimuovi modal esistente se presente
+    const existingModal = document.getElementById('feedbackModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // Aggiungi nuovo modal al body
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+    // Mostra il modal
+    const modal = new bootstrap.Modal(document.getElementById('feedbackModal'));
+    modal.show();
+}
+
+function submitDetailedFeedback(taskId, suggestionId) {
+    const feedbackData = {
+        csrf_token: document.querySelector('meta[name="csrf-token"]')?.content || '',
+        task_id: taskId,
+        suggestion_id: suggestionId,
+        was_helpful: document.querySelector('input[name="helpful"]:checked').value === 'true',
+        completed_task: document.querySelector('input[name="completed"]:checked').value === 'true',
+        time_spent_minutes: document.getElementById('timeSpent').value || null,
+        user_comment: document.getElementById('feedbackComment').value || null
+    };
+
+    fetch(url('/ai/smart-focus/feedback/detailed'), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify(feedbackData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('✅ Feedback dettagliato inviato. Grazie!', 'success');
+            // Chiudi modal
+            bootstrap.Modal.getInstance(document.getElementById('feedbackModal')).hide();
+            // Aggiorna UI
+            const feedbackDiv = document.getElementById('smartFocusFeedback');
+            if (feedbackDiv) {
+                feedbackDiv.innerHTML = `
+                    <div class="alert alert-sm alert-success">
+                        <i class="fas fa-check-circle"></i> Feedback dettagliato ricevuto. Grazie per aiutarci a migliorare!
+                    </div>
+                `;
+            }
+        }
+    })
+    .catch(error => {
+        console.error('Error sending detailed feedback:', error);
+        showToast('Errore nell\'invio del feedback', 'error');
+    });
+}
+
 // Debug: log errori JavaScript (solo in dev)
 if (window.location.hostname === 'localhost' || window.location.hostname === 'beweb.local') {
     window.addEventListener('error', function(e) {
@@ -454,13 +601,32 @@ function displayADHDFocusResult(data) {
 
         // Pulsanti azione
         html += `
-            <div class="d-grid gap-2 d-md-flex">
+            <div class="d-grid gap-2 d-md-flex mb-3">
                 <a href="${url('/tasks/' + primary.id)}" class="btn btn-${isQuickWin ? 'success' : 'warning'} btn-lg">
                     <i class="fas fa-play"></i> ${isQuickWin ? 'FAI SUBITO!' : 'INIZIA ORA'}
                 </a>
                 <button onclick="markAsStarted(${primary.id})" class="btn btn-outline-success">
                     <i class="fas fa-check"></i> Ho iniziato!
                 </button>
+            </div>
+
+            <!-- Feedback section -->
+            <div class="border-top pt-3" id="smartFocusFeedback">
+                <small class="text-muted d-block mb-2">Questo suggerimento ti è stato utile?</small>
+                <div class="btn-group btn-group-sm" role="group">
+                    <button onclick="sendSmartFocusFeedback(${primary.id}, true, '${data.suggestion_id || ''}')"
+                            class="btn btn-outline-success">
+                        <i class="fas fa-thumbs-up"></i> Utile
+                    </button>
+                    <button onclick="sendSmartFocusFeedback(${primary.id}, false, '${data.suggestion_id || ''}')"
+                            class="btn btn-outline-danger">
+                        <i class="fas fa-thumbs-down"></i> Non utile
+                    </button>
+                    <button onclick="showFeedbackModal(${primary.id}, '${data.suggestion_id || ''}')"
+                            class="btn btn-outline-primary">
+                        <i class="fas fa-comment"></i> Dettaglio
+                    </button>
+                </div>
             </div>
         </div>
     </div>
