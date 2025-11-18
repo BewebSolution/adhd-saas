@@ -88,11 +88,21 @@ class GoogleTasksService {
             if ($this->client->isAccessTokenExpired() && $this->client->getRefreshToken()) {
                 try {
                     $newTokens = $this->client->fetchAccessTokenWithRefreshToken($this->client->getRefreshToken());
-                    $this->saveTokens($newTokens);
-                    $this->client->setAccessToken($newTokens); // Importante: imposta i nuovi token nel client
+
+                    // Verifica che il refresh abbia restituito un token valido
+                    if (!isset($newTokens['access_token'])) {
+                        error_log('Failed to refresh Google token: Invalid token format');
+                        throw new Exception('Invalid token format');
+                    }
+
+                    if ($this->saveTokens($newTokens)) {
+                        $this->client->setAccessToken($newTokens); // Importante: imposta i nuovi token nel client
+                    } else {
+                        throw new Exception('Failed to save refreshed tokens');
+                    }
                 } catch (\Exception $e) {
                     error_log('Failed to refresh Google token: ' . $e->getMessage());
-                    throw new Exception('Failed to refresh Google token: ' . $e->getMessage());
+                    throw new Exception('Failed to refresh Google token: Invalid token format');
                 }
             }
 
@@ -282,6 +292,12 @@ class GoogleTasksService {
      */
     private function saveTokens(array $tokens): bool {
         try {
+            // Verifica che access_token esista
+            if (!isset($tokens['access_token'])) {
+                error_log('Invalid token format: missing access_token');
+                return false;
+            }
+
             $expiresAt = isset($tokens['expires_in'])
                 ? date('Y-m-d H:i:s', time() + $tokens['expires_in'])
                 : null;
