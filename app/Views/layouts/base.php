@@ -19,6 +19,9 @@
     <!-- SB Admin 2 CSS -->
     <link href="<?= asset('sb-admin-2.min.css') ?>" rel="stylesheet">
 
+    <!-- Mobile Responsive CSS -->
+    <link href="<?= asset('mobile-responsive.css') ?>" rel="stylesheet">
+
     <!-- Custom CSS (se esiste) -->
     <!-- <link href="<?= asset('custom-sb.css') ?>" rel="stylesheet"> -->
 
@@ -313,6 +316,9 @@
 
     <!-- Pomodoro ADHD Timer -->
     <script src="<?= asset('js/pomodoro-adhd.js') ?>"></script>
+
+    <!-- Mobile Enhancements -->
+    <script src="<?= asset('js/mobile-enhancements.js') ?>"></script>
 
     <!-- Onboarding Tour JS (must be last) -->
     <script src="<?= asset('onboarding.js') ?>"></script>

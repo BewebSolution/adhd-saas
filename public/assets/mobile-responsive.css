@@ -1,0 +1,489 @@
+/**
+ * Mobile Responsive Fixes for ADHD Task Manager
+ * Ottimizzazioni per dispositivi mobili e tablet
+ */
+
+/* ========================================
+   GENERAL MOBILE FIXES
+   ======================================== */
+
+/* Prevent horizontal scroll */
+html, body {
+    overflow-x: hidden !important;
+    width: 100% !important;
+}
+
+/* Fix container on mobile */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 10px !important;
+        padding-right: 10px !important;
+    }
+}
+
+/* ========================================
+   SIDEBAR MOBILE
+   ======================================== */
+
+/* Sidebar collapsed by default on mobile */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 0 !important;
+        min-height: 100vh;
+        position: fixed !important;
+        top: 0;
+        left: 0;
+        z-index: 9999;
+        transition: width 0.3s ease;
+    }
+
+    .sidebar.toggled {
+        width: 100% !important;
+        max-width: 250px !important;
+    }
+
+    /* Content full width when sidebar hidden */
+    #content-wrapper {
+        width: 100% !important;
+        margin-left: 0 !important;
+    }
+
+    /* Show mobile toggle button */
+    #sidebarToggleTop {
+        display: block !important;
+    }
+}
+
+/* ========================================
+   TABLES RESPONSIVE
+   ======================================== */
+
+/* Make tables scrollable on mobile */
+@media (max-width: 768px) {
+    .table-responsive {
+        -webkit-overflow-scrolling: touch;
+        margin-bottom: 15px;
+    }
+
+    /* Reduce table font size */
+    .table {
+        font-size: 0.85rem;
+    }
+
+    /* Hide less important columns */
+    .table th:nth-child(n+6),
+    .table td:nth-child(n+6) {
+        display: none;
+    }
+
+    /* Make actions column always visible */
+    .table th:last-child,
+    .table td:last-child {
+        display: table-cell !important;
+        position: sticky;
+        right: 0;
+        background: white;
+        box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    }
+}
+
+/* ========================================
+   CARDS & DASHBOARD
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Stack cards vertically */
+    .row > .col-xl-3,
+    .row > .col-lg-6,
+    .row > .col-md-6 {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 15px;
+    }
+
+    /* Reduce card padding */
+    .card {
+        margin-bottom: 15px;
+    }
+
+    .card-body {
+        padding: 15px !important;
+    }
+
+    /* Dashboard stats cards */
+    .card.border-left-primary,
+    .card.border-left-success,
+    .card.border-left-info,
+    .card.border-left-warning {
+        border-left-width: 3px !important;
+    }
+}
+
+/* ========================================
+   FORMS MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Stack form elements */
+    .form-row > .col,
+    .form-row > [class*="col-"] {
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 10px;
+    }
+
+    /* Larger touch targets */
+    .btn {
+        padding: 10px 20px;
+        font-size: 1rem;
+        min-height: 44px; /* iOS recommended touch target */
+    }
+
+    .form-control,
+    .form-select {
+        font-size: 16px !important; /* Prevent zoom on iOS */
+        padding: 10px;
+        min-height: 44px;
+    }
+
+    /* Full width buttons on mobile */
+    .btn-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .btn-group .btn {
+        width: 100%;
+        margin-bottom: 5px;
+        border-radius: 0.35rem !important;
+    }
+}
+
+/* ========================================
+   TOPBAR MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .topbar {
+        padding: 0.5rem 1rem !important;
+    }
+
+    /* Hide text, show only icons */
+    .topbar .nav-item span {
+        display: none !important;
+    }
+
+    /* Dropdown adjustments */
+    .dropdown-menu {
+        position: absolute !important;
+        right: 0 !important;
+        left: auto !important;
+        min-width: 200px;
+    }
+
+    /* User info compact */
+    #userDropdown .d-none {
+        display: none !important;
+    }
+}
+
+/* ========================================
+   MODALS MOBILE
+   ======================================== */
+
+@media (max-width: 576px) {
+    .modal-dialog {
+        margin: 0.5rem;
+        max-width: calc(100% - 1rem);
+    }
+
+    .modal-content {
+        border-radius: 0.5rem;
+    }
+
+    /* Full screen modals on very small devices */
+    .modal.fade .modal-dialog {
+        transform: translateY(100%);
+    }
+
+    .modal.show .modal-dialog {
+        transform: translateY(0);
+    }
+}
+
+/* ========================================
+   POMODORO TIMER MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+    #pomodoroFloating {
+        width: calc(100% - 20px) !important;
+        max-width: 300px !important;
+        right: 10px !important;
+        bottom: 10px !important;
+        left: auto !important;
+    }
+
+    .pomodoro-display {
+        font-size: 1.5rem !important;
+    }
+
+    .pomodoro-controls button {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ========================================
+   TASK LIST MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Task cards instead of table rows */
+    .task-list-mobile {
+        display: block !important;
+    }
+
+    .task-list-mobile .task-item {
+        border: 1px solid #dee2e6;
+        border-radius: 0.5rem;
+        padding: 15px;
+        margin-bottom: 10px;
+        background: white;
+    }
+
+    .task-item .task-title {
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #2e2e2e;
+    }
+
+    .task-item .task-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 10px;
+        font-size: 0.875rem;
+    }
+
+    .task-item .task-actions {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    .task-item .task-actions .btn {
+        flex: 1;
+        min-width: 80px;
+    }
+}
+
+/* ========================================
+   FILTERS MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Collapse filters by default */
+    .filters-mobile {
+        margin-bottom: 20px;
+    }
+
+    .filters-toggle {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        background: #f8f9fc;
+        border: 1px solid #dee2e6;
+        border-radius: 0.35rem;
+        margin-bottom: 10px;
+    }
+
+    .filters-content {
+        display: none;
+    }
+
+    .filters-content.show {
+        display: block;
+    }
+}
+
+/* ========================================
+   QUICK ACTIONS MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Floating action button */
+    .fab-container {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000;
+    }
+
+    .fab-button {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: #4e73df;
+        color: white;
+        border: none;
+        box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+        font-size: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .fab-menu {
+        position: absolute;
+        bottom: 70px;
+        right: 0;
+        display: none;
+    }
+
+    .fab-menu.show {
+        display: block;
+    }
+
+    .fab-menu-item {
+        margin-bottom: 10px;
+        text-align: right;
+    }
+}
+
+/* ========================================
+   UTILITIES MOBILE
+   ======================================== */
+
+@media (max-width: 768px) {
+    /* Hide on mobile */
+    .d-mobile-none {
+        display: none !important;
+    }
+
+    /* Show only on mobile */
+    .d-mobile-block {
+        display: block !important;
+    }
+
+    /* Text adjustments */
+    h1 { font-size: 1.75rem; }
+    h2 { font-size: 1.5rem; }
+    h3 { font-size: 1.25rem; }
+    h4 { font-size: 1.1rem; }
+
+    /* Spacing adjustments */
+    .mb-4 {
+        margin-bottom: 1rem !important;
+    }
+
+    .p-4 {
+        padding: 1rem !important;
+    }
+}
+
+/* ========================================
+   LANDSCAPE PHONE FIXES
+   ======================================== */
+
+@media (max-width: 812px) and (orientation: landscape) {
+    .sidebar {
+        max-height: 100vh;
+        overflow-y: auto;
+    }
+
+    .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+
+    /* Reduce vertical spacing */
+    .card-body {
+        padding: 10px !important;
+    }
+
+    .mb-4 {
+        margin-bottom: 0.5rem !important;
+    }
+}
+
+/* ========================================
+   IPAD/TABLET SPECIFIC
+   ======================================== */
+
+@media (min-width: 768px) and (max-width: 1024px) {
+    /* Sidebar always visible but narrower */
+    .sidebar {
+        width: 200px !important;
+    }
+
+    .sidebar .nav-item span {
+        font-size: 0.85rem;
+    }
+
+    /* Content adjustments */
+    #content-wrapper {
+        margin-left: 200px;
+    }
+
+    /* 2 column layout for cards */
+    .col-xl-3 {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+    }
+}
+
+/* ========================================
+   TOUCH OPTIMIZATIONS
+   ======================================== */
+
+/* Larger touch targets for checkboxes and radios */
+@media (pointer: coarse) {
+    input[type="checkbox"],
+    input[type="radio"] {
+        min-width: 24px;
+        min-height: 24px;
+        margin: 5px;
+    }
+
+    /* Prevent accidental taps */
+    a, button {
+        -webkit-tap-highlight-color: rgba(0,0,0,0.1);
+    }
+
+    /* Smooth scrolling */
+    * {
+        -webkit-overflow-scrolling: touch;
+    }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid #000;
+    }
+
+    .btn-primary {
+        background-color: #0056b3;
+        border: 2px solid #000;
+    }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.001ms !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    /* Future dark mode implementation */
+}
