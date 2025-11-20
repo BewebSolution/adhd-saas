@@ -349,7 +349,30 @@
             height: calc(4.375rem - 2rem);
             margin: auto 1rem;
         }
+
+        /* CRITICAL: Hide sidebar on mobile by default */
+        @media (max-width: 768px) {
+            .sidebar.toggled {
+                transform: translateX(-100%) !important;
+            }
+            /* Ensure sidebar starts hidden on page load */
+            .sidebar {
+                transform: translateX(-100%);
+            }
+        }
     </style>
+
+    <!-- Script to immediately hide sidebar on mobile -->
+    <script>
+        if (window.innerWidth <= 768) {
+            document.addEventListener('DOMContentLoaded', function() {
+                const sidebar = document.getElementById('accordionSidebar');
+                if (sidebar) {
+                    sidebar.classList.add('toggled');
+                }
+            });
+        }
+    </script>
 
 </body>
 </html>

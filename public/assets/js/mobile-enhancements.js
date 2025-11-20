@@ -15,7 +15,7 @@
      */
     function initMobileEnhancements() {
         if (window.innerWidth <= 768 || isMobile) {
-            // Close sidebar on page load for mobile
+            // IMPORTANT: Add toggled class to hide sidebar on mobile by default
             closeSidebarMobile();
 
             // Add mobile-specific event listeners
@@ -36,8 +36,12 @@
      */
     function closeSidebarMobile() {
         const sidebar = document.getElementById('accordionSidebar');
-        if (sidebar) {
+        if (sidebar && window.innerWidth <= 768) {
+            // On mobile, toggled = hidden (opposite of desktop)
             sidebar.classList.add('toggled');
+            // Ensure no inline styles interfere
+            sidebar.style.removeProperty('width');
+            sidebar.style.removeProperty('overflow-x');
         }
     }
 
@@ -50,12 +54,19 @@
         const contentWrapper = document.getElementById('content-wrapper');
 
         if (sidebarToggle && sidebar) {
-            // Override default toggle behavior for mobile
-            sidebarToggle.addEventListener('click', function(e) {
+            // Remove any existing click handlers
+            const newToggle = sidebarToggle.cloneNode(true);
+            sidebarToggle.parentNode.replaceChild(newToggle, sidebarToggle);
+
+            // Add our mobile-specific handler
+            newToggle.addEventListener('click', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
+
+                // Toggle sidebar (remember: on mobile, toggled = hidden)
                 sidebar.classList.toggle('toggled');
 
-                // Add overlay when sidebar is open
+                // Add overlay when sidebar is VISIBLE (not toggled)
                 if (!sidebar.classList.contains('toggled')) {
                     createOverlay();
                 } else {

@@ -25,24 +25,31 @@ html, body {
    SIDEBAR MOBILE
    ======================================== */
 
-/* Sidebar collapsed by default on mobile */
+/* Fix SB Admin 2 sidebar for mobile */
 @media (max-width: 768px) {
+    /* Override SB Admin default behavior */
     .sidebar {
-        width: 0 !important;
-        min-height: 100vh;
+        width: 14rem !important; /* Default SB Admin width */
         position: fixed !important;
         top: 0;
         left: 0;
+        height: 100vh;
         z-index: 9999;
-        transition: width 0.3s ease;
+        transform: translateX(-100%); /* Hide by default */
+        transition: transform 0.3s ease-in-out;
     }
 
+    /* Show sidebar when NOT toggled (opposite of desktop) */
+    .sidebar:not(.toggled) {
+        transform: translateX(0);
+    }
+
+    /* Hide sidebar when toggled on mobile */
     .sidebar.toggled {
-        width: 100% !important;
-        max-width: 250px !important;
+        transform: translateX(-100%);
     }
 
-    /* Content full width when sidebar hidden */
+    /* Content full width always on mobile */
     #content-wrapper {
         width: 100% !important;
         margin-left: 0 !important;
@@ -50,7 +57,12 @@ html, body {
 
     /* Show mobile toggle button */
     #sidebarToggleTop {
-        display: block !important;
+        display: inline-block !important;
+    }
+
+    /* Hide desktop toggle */
+    #sidebarToggle {
+        display: none !important;
     }
 }
 
