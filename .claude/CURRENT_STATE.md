@@ -1,4 +1,4 @@
-# Ultimo aggiornamento: 18 Novembre 2024
+# Ultimo aggiornamento: 20 Novembre 2024
 
 ## Funziona
 - [x] Sistema autenticazione utenti
@@ -12,6 +12,8 @@
 - [x] Timer Pomodoro ADHD con suggerimenti AI
 - [x] Dashboard con statistiche e quick actions
 - [x] Gestione API keys da interfaccia (admin)
+- [x] **Mobile Responsive Design completo** (sidebar, tabelle, FAB)
+- [x] Documentazione .claude per setup rapido
 
 ## In corso
 - [ ] Notifiche Multiple Smart (multi-canale con reminder progressivi)
